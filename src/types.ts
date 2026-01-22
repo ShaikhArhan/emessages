@@ -1,6 +1,6 @@
 export type MessageType = "log" | "war" | "err";
 
-export interface TostConfig {
+export interface ToastConfig {
   style?: string;
   message?: string;
   position?:
@@ -18,7 +18,7 @@ export interface TostConfig {
 export interface EmessageOptions {
   type?: MessageType;
   break?: boolean;
-  tost?: boolean | TostConfig;
+  toast?: boolean | ToastConfig;
   returnEM?: boolean;
   callBack?: (...args: any[]) => any;
 }
@@ -26,3 +26,5 @@ export interface EmessageOptions {
 export interface StoredEmessage extends EmessageOptions {
   message: string;
 }
+
+export type EmessageConfig = EmessageOptions & { [key: string]: any };

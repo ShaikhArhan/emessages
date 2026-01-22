@@ -1,4 +1,4 @@
-import { TostConfig } from "./types";
+import { ToastConfig } from "./types";
 
 export function isBrowser(): boolean {
   return typeof window !== "undefined" && typeof window.document !== "undefined";
@@ -6,7 +6,7 @@ export function isBrowser(): boolean {
 
 export function showToast(
   message: string,
-  tostConfig: boolean | TostConfig
+  toastConfig: boolean | ToastConfig
 ): void {
   if (!isBrowser()) {
     return;
@@ -14,7 +14,7 @@ export function showToast(
 
   const toast = document.createElement("div");
 
-  const config: TostConfig = typeof tostConfig === "object" ? tostConfig : {};
+  const config: ToastConfig = typeof toastConfig === "object" ? toastConfig : {};
 
   toast.textContent = config.message || message;
 

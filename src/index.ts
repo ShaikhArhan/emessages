@@ -1,5 +1,10 @@
 import { individualMessageStore, globalMessageStore } from "./store";
-import type { EmessageOptions, StoredEmessage, TostConfig } from "./types";
+import type {
+  EmessageConfig,
+  EmessageOptions,
+  StoredEmessage,
+  ToastConfig,
+} from "./types";
 import { isBrowser, showToast } from "./utils";
 
 function parseConfig(
@@ -8,7 +13,7 @@ function parseConfig(
   const options: EmessageOptions = {};
   let message: string | null = null;
   let name: string | null = null;
-  const optionKeys = ["type", "break", "tost", "returnEM", "callBack"];
+  const optionKeys = ["type", "break", "toast", "returnEM", "callBack"];
 
   for (const key in config) {
     if (Object.prototype.hasOwnProperty.call(config, key)) {
@@ -59,8 +64,8 @@ function processEmessage(
   }
 
   // 2. Toast notification
-  if (config.tost && isBrowser()) {
-    showToast(message, config.tost);
+  if (config.toast && isBrowser()) {
+    showToast(message, config.toast);
   }
 
   // 3. Callback
@@ -90,7 +95,7 @@ function processEmessage(
   }
 }
 
-export function Emessage(...configs: Record<string, any>[]) {
+export function Emessage(...configs: EmessageConfig[]) {
   for (const config of configs) {
     const parsed = parseConfig(config);
     if (parsed) {
@@ -99,7 +104,7 @@ export function Emessage(...configs: Record<string, any>[]) {
   }
 }
 
-Emessage.global = function (...configs: Record<string, any>[]) {
+Emessage.global = function (...configs: EmessageConfig[]) {
   for (const config of configs) {
     const parsed = parseConfig(config);
     if (parsed) {
