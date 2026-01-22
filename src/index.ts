@@ -7,7 +7,6 @@ import type {
   MessageType,
 } from "./types";
 import { isBrowser, showToast } from "./utils";
-import chalk from "chalk";
 
 function parseConfig(
   config: Record<string, any>
@@ -77,13 +76,13 @@ function processEmessage(
     } else {
       switch (consoleType) {
         case "log":
-          console.log(chalk.bgWhite.black(message));
+          console.log(`\x1b[30;47m LOG \x1b[0m ${message}`);
           break;
         case "war":
-          console.warn(chalk.bgYellow.white(message));
+          console.warn(`\x1b[37;43m WARN \x1b[0m ${message}`);
           break;
         case "err":
-          console.error(chalk.bgRed.white(message));
+          console.error(`\x1b[37;41m ERROR \x1b[0m ${message}`);
           break;
       }
     }
