@@ -1,0 +1,36 @@
+{
+  "name": "emessages",
+  "version": "2.0.0",
+  "description": "A flexible error handling library for JS/TS. Define custom errors with console, toast, and callbacks, supporting global/local scopes and all environments.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./dist/emessages.css": "./dist/emessages.css"
+  },
+  "keywords": [
+    "error",
+    "message",
+    "logging",
+    "toast",
+    "notification"
+  ],
+  "sideEffects": true,
+  "scripts": {
+    "build": "tsup"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "tsup": "^8.0.2",
+    "typescript": "^5.3.3"
+  }
+}
