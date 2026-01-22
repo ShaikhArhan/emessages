@@ -76,13 +76,13 @@ function processEmessage(
     } else {
       switch (consoleType) {
         case "log":
-          console.log(`\x1b[30;47m LOG \x1b[0m ${message}`);
+          console.log(`\x1b[30;47m ${message} \x1b[0m`);
           break;
         case "war":
-          console.warn(`\x1b[37;43m WARN \x1b[0m ${message}`);
+          console.warn(`\x1b[37;43m ${message} \x1b[0m`);
           break;
         case "err":
-          console.error(`\x1b[37;41m ERROR \x1b[0m ${message}`);
+          console.error(`\x1b[37;41m ${message} \x1b[0m`);
           break;
       }
     }
