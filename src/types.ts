@@ -16,7 +16,7 @@ export interface ToastConfig {
 }
 
 export interface EmessageOptions {
-  type?: MessageType;
+  type?: MessageType | boolean;
   break?: boolean;
   toast?: boolean | ToastConfig;
   returnEM?: boolean;

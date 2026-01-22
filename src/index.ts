@@ -4,8 +4,10 @@ import type {
   EmessageOptions,
   StoredEmessage,
   ToastConfig,
+  MessageType,
 } from "./types";
 import { isBrowser, showToast } from "./utils";
+import chalk from "chalk";
 
 function parseConfig(
   config: Record<string, any>
@@ -48,19 +50,43 @@ function processEmessage(
   config: StoredEmessage
 ): string | void {
   const message = config.message;
-  const type = config.type ?? "err";
+
+  let consoleType: MessageType | false;
+  if (config.type === false) {
+    consoleType = false;
+  } else if (config.type === true || config.type === undefined) {
+    consoleType = "err";
+  } else {
+    consoleType = config.type;
+  }
 
   // 1. Console log
-  switch (type) {
-    case "log":
-      console.log(message);
-      break;
-    case "war":
-      console.warn(message);
-      break;
-    case "err":
-      console.error(message);
-      break;
+  if (consoleType) {
+    if (isBrowser()) {
+      switch (consoleType) {
+        case "log":
+          console.log(message);
+          break;
+        case "war":
+          console.warn(message);
+          break;
+        case "err":
+          console.error(message);
+          break;
+      }
+    } else {
+      switch (consoleType) {
+        case "log":
+          console.log(chalk.bgWhite.black(message));
+          break;
+        case "war":
+          console.warn(chalk.bgYellow.white(message));
+          break;
+        case "err":
+          console.error(chalk.bgRed.white(message));
+          break;
+      }
+    }
   }
 
   // 2. Toast notification
