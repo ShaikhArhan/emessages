@@ -90,7 +90,7 @@ function processEmessage(
 
   // 2. Toast notification
   if (config.toast && isBrowser()) {
-    showToast(message, config.toast);
+    showToast(message, config.toast, consoleType as MessageType);
   }
 
   // 3. Callback
