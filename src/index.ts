@@ -41,12 +41,23 @@ function parseConfig(
     return null;
   }
 
+  // Apply default for 'break' if not explicitly set
+  if (options.break === undefined) {
+    if (options.type === "war" || options.type === "log") {
+      options.break = false;
+    } else {
+      // Default for 'err' type or if type is not specified
+      options.break = true;
+    }
+  }
+
   return { name, options: { ...options, message } };
 }
 
 function processEmessage(
   errorName: string,
-  config: StoredEmessage
+  config: StoredEmessage,
+  errorToThrow?: Error
 ): string | void {
   const message = config.message;
 
@@ -113,7 +124,7 @@ function processEmessage(
   // 5. Break execution
   if (config.break ?? true) {
     if (isBrowser()) {
-      throw new Error(message);
+      throw errorToThrow || new Error(message);
     } else {
       process.exit(1);
     }
@@ -139,6 +150,7 @@ Emessage.global = function (...configs: EmessageConfig[]) {
 };
 
 export function showE(error: string | Record<string, any>): string | void {
+  const errorForStack = new Error();
   let config: StoredEmessage | null = null;
   let errorName: string | null = null;
 
@@ -165,6 +177,7 @@ export function showE(error: string | Record<string, any>): string | void {
   }
 
   if (config && errorName) {
-    return processEmessage(errorName, config);
+    errorForStack.message = config.message;
+    return processEmessage(errorName, config, errorForStack);
   }
 }

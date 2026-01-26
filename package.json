@@ -1,6 +1,6 @@
 {
   "name": "emessages",
-  "version": "2.2.1",
+  "version": "2.2.4",
   "description": "A flexible error handling library for JS/TS. Define custom errors with console, toast, and callbacks, supporting global/local scopes and all environments.",
   "type": "module",
   "main": "./dist/index.cjs",

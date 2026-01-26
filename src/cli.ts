@@ -2,30 +2,33 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as readline from 'readline';
 
-const fileName = 'globalEMessage';
-const jsContent = `import { Emessage } from "emessages";
-
-/*
- * Add your global error messages and available operation.
- */
-Emessage.global(
+const fileName = 'EmessageGlobal';
+const jsContent = `export const Emessage_global = [
     {
-        "GLOBAL_ERROR_NAME": "GLOBAL ERROR MESSAGE",
-    }
-);
+        GLOBAL_ERROR_MESSAGE: "Global error message.",
+        type:"war",
+        break:false,
+        toast: true
+    },
+    // {
+    //     Add your custom global messages here.
+    // }
+];
 `;
 
-const tsContent = `import { Emessage } from "emessages";
-
-/*
- * Add your global error messages and available operation.
- */
-Emessage.global(
+const tsContent = `export const Emessage_global = [
     {
-        "GLOBAL_ERROR_NAME": "GLOBAL ERROR MESSAGE",
-    }
-);
+        GLOBAL_ERROR_MESSAGE: "Global error message.",
+        type:"war",
+        break:false,
+        toast: true
+    },
+    // {
+    //     Add your custom global messages here.
+    // }
+];
 `;
 
 function findProjectRoot(startDir: string): string | null {
@@ -40,35 +43,45 @@ function findProjectRoot(startDir: string): string | null {
 }
 
 function generateGlobalEmessageFile() {
-    const cwd = process.cwd();
-    const projectRoot = findProjectRoot(cwd);
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
 
-    if (!projectRoot) {
-        console.error('Error: Could not find project root (package.json not found).');
-        process.exit(1);
-    }
+    rl.question('You want to create EmessageGlobal file: (y) ', (answer) => {
+        if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes' || answer === '') {
+            const cwd = process.cwd();
+            const projectRoot = findProjectRoot(cwd);
 
-    const tsconfigPath = path.join(projectRoot, 'tsconfig.json');
-    const isTypeScriptProject = fs.existsSync(tsconfigPath);
+            if (!projectRoot) {
+                console.error('Error: Could not find project root (package.json not found).');
+                process.exit(1);
+            }
 
-    const fileExtension = isTypeScriptProject ? 'ts' : 'js';
-    const content = isTypeScriptProject ? tsContent : jsContent;
-    const outputFileName = `${fileName}.${fileExtension}`;
-    const outputPath = path.join(projectRoot, outputFileName);
+            const tsconfigPath = path.join(projectRoot, 'tsconfig.json');
+            const isTypeScriptProject = fs.existsSync(tsconfigPath);
 
-    if (fs.existsSync(outputPath)) {
-        console.warn(`Warning: ${outputFileName} already exists. Skipping file creation.`);
-        process.exit(0);
-    }
+            const fileExtension = isTypeScriptProject ? 'ts' : 'js';
+            const content = isTypeScriptProject ? tsContent : jsContent;
+            const outputFileName = `${fileName}.${fileExtension}`;
+            const outputPath = path.join(projectRoot, outputFileName);
 
-    try {
-        fs.writeFileSync(outputPath, content, 'utf8');
-        console.log(`Successfully created ${outputFileName} in your project root.`);
-        console.log('You can now configure global messages by editing this file.');
-    } catch (error: any) {
-        console.error(`Error creating ${outputFileName}:`, error.message);
-        process.exit(1);
-    }
+            if (fs.existsSync(outputPath)) {
+                console.warn(`Warning: ${outputFileName} already exists. Skipping file creation.`);
+                process.exit(0);
+            }
+
+            try {
+                fs.writeFileSync(outputPath, content, 'utf8');
+                console.log(`Successfully created ${outputFileName} in your project root.`);
+                console.log('You can now configure global messages by editing this file.');
+            } catch (error: any) {
+                console.error(`Error creating ${outputFileName}:`, error.message);
+                process.exit(1);
+            }
+        }
+        rl.close();
+    });
 }
 
 generateGlobalEmessageFile();
