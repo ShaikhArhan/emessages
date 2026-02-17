@@ -1,9 +1,11 @@
 export type MessageType = "log" | "war" | "err" | boolean;
+export type ArgsM = Record<string, any>;
+export type DynamicValue<T> = T | ((argsM: ArgsM) => T);
 
 export interface ToastConfig {
-  message?: string;
-  style?: string;
-  class?: string;
+  message?: DynamicValue<string | undefined>;
+  style?: DynamicValue<string | undefined>;
+  class?: DynamicValue<string | undefined>;
   position?:
     | "top"
     | "bottom"
@@ -18,24 +20,28 @@ export interface ToastConfig {
     | "bottom-center"
     | "center-left"
     | "center-right";
-  stay?: boolean;
-  duration?: number;
-  delay?: number;
+  stay?: DynamicValue<boolean | undefined>;
+  duration?: DynamicValue<number | undefined>;
+  delay?: DynamicValue<number | undefined>;
 }
 
 export interface EmessageOptions {
-  type?: MessageType;
-  break?: boolean;
-  toast?: boolean | ToastConfig;
-  returnEM?: boolean;
-  callBack?: () => void;
+  type?: DynamicValue<MessageType>;
+  break?: DynamicValue<boolean>;
+  toast?: DynamicValue<boolean | ToastConfig>;
+  returnEM?: DynamicValue<boolean>;
+  callBack?: (argsM: ArgsM) => void;
 }
 
 export interface EmessageConfig extends EmessageOptions {
-  [key: string]: string | MessageType | boolean | (() => void) | ToastConfig | undefined;
+  [key: string]:
+    | string
+    | DynamicValue<string | MessageType | boolean | ToastConfig | undefined>
+    | ((argsM: ArgsM) => void)
+    | undefined;
 }
 
 export interface StoredEmessage extends EmessageOptions {
-  message: string;
+  message: DynamicValue<string>;
 }
 

@@ -1,5 +1,7 @@
 import { individualMessageStore, globalMessageStore } from "./store";
 import type {
+  ArgsM,
+  DynamicValue,
   EmessageConfig,
   EmessageOptions,
   StoredEmessage,
@@ -8,11 +10,62 @@ import type {
 } from "./types";
 import { isBrowser, showToast } from "./utils";
 
+function resolveDynamicValue<T>(value: DynamicValue<T> | undefined, argsM: ArgsM): T | undefined {
+  if (typeof value === "function") {
+    return (value as (args: ArgsM) => T)(argsM);
+  }
+  return value;
+}
+
+function getByPath(target: ArgsM, path: string): any {
+  const normalized = path.replace(/\[(\w+)\]/g, ".$1").replace(/^\./, "");
+  const segments = normalized.split(".").filter(Boolean);
+
+  let current: any = target;
+  for (const segment of segments) {
+    if (current == null) return undefined;
+    current = current[segment];
+  }
+  return current;
+}
+
+function interpolateArgsM(template: string, argsM: ArgsM): string {
+  return template.replace(/\$\{\s*argsM\.([^}]+)\s*\}/g, (match, rawPath) => {
+    const path = String(rawPath).trim();
+    const value = getByPath(argsM, path);
+    if (value === undefined) return match;
+    if (typeof value === "object" && value !== null) {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return String(value);
+      }
+    }
+    return String(value);
+  });
+}
+
+function resolveToastConfig(toast: boolean | ToastConfig, argsM: ArgsM): boolean | ToastConfig {
+  if (typeof toast !== "object" || toast === null) {
+    return toast;
+  }
+
+  return {
+    message: resolveDynamicValue(toast.message, argsM),
+    style: resolveDynamicValue(toast.style, argsM),
+    class: resolveDynamicValue(toast.class, argsM),
+    position: toast.position,
+    stay: resolveDynamicValue(toast.stay, argsM),
+    duration: resolveDynamicValue(toast.duration, argsM),
+    delay: resolveDynamicValue(toast.delay, argsM),
+  };
+}
+
 function parseConfig(
   config: Record<string, any>
 ): { name: string; options: StoredEmessage } | null {
   const options: EmessageOptions = {};
-  let message: string | null = null;
+  let message: DynamicValue<string> | null = null;
   let name: string | null = null;
   const optionKeys = ["type", "break", "toast", "returnEM", "callBack"];
 
@@ -28,7 +81,7 @@ function parseConfig(
           continue;
         }
         name = key;
-        message = String(config[key]);
+        message = config[key];
       }
     }
   }
@@ -57,17 +110,19 @@ function parseConfig(
 function processEmessage(
   errorName: string,
   config: StoredEmessage,
+  argsM: ArgsM,
   errorToThrow?: Error
 ): string | void {
-  const message = config.message;
+  const message = interpolateArgsM(String(resolveDynamicValue(config.message, argsM) ?? ""), argsM);
 
   let consoleType: MessageType | false;
-  if (config.type === false) {
+  const resolvedType = resolveDynamicValue(config.type, argsM);
+  if (resolvedType === false) {
     consoleType = false;
-  } else if (config.type === true || config.type === undefined) {
+  } else if (resolvedType === true || resolvedType === undefined) {
     consoleType = "err";
   } else {
-    consoleType = config.type;
+    consoleType = resolvedType;
   }
 
   // 1. Console log
@@ -100,14 +155,15 @@ function processEmessage(
   }
 
   // 2. Toast notification
-  if (config.toast && isBrowser()) {
-    showToast(message, config.toast, consoleType as MessageType);
+  const resolvedToast = resolveDynamicValue(config.toast, argsM);
+  if (resolvedToast && isBrowser()) {
+    showToast(message, resolveToastConfig(resolvedToast, argsM), consoleType as MessageType);
   }
 
   // 3. Callback
   if (config.callBack) {
     try {
-      config.callBack();
+      config.callBack(argsM);
     } catch (e: any) {
       console.error(
         `emessages: Error in callBack for "${errorName}":`,
@@ -117,12 +173,13 @@ function processEmessage(
   }
 
   // 4. Return error message
-  if (config.returnEM) {
+  if (resolveDynamicValue(config.returnEM, argsM)) {
     return message;
   }
 
   // 5. Break execution
-  if (config.break ?? true) {
+  const resolvedBreak = resolveDynamicValue(config.break, argsM);
+  if (resolvedBreak ?? true) {
     if (isBrowser()) {
       throw errorToThrow || new Error(message);
     } else {
@@ -149,7 +206,7 @@ Emessage.global = function (...configs: EmessageConfig[]) {
   }
 };
 
-export function showE(error: string | Record<string, any>): string | void {
+export function showE(error: string | Record<string, any>, argsM: ArgsM = {}): string | void {
   const errorForStack = new Error();
   let config: StoredEmessage | null = null;
   let errorName: string | null = null;
@@ -177,7 +234,10 @@ export function showE(error: string | Record<string, any>): string | void {
   }
 
   if (config && errorName) {
-    errorForStack.message = config.message;
-    return processEmessage(errorName, config, errorForStack);
+    errorForStack.message = interpolateArgsM(
+      String(resolveDynamicValue(config.message, argsM) ?? ""),
+      argsM
+    );
+    return processEmessage(errorName, config, argsM, errorForStack);
   }
 }

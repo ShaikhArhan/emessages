@@ -137,9 +137,40 @@ Each config object passed to `Emessage` has one error name/message and a set of 
 -   `style?`: `string`. Custom CSS classes to apply.
 -   `position?`: `string`. e.g., `"top-right"`, `"bottom-left"`, `"center"`.
 
-### `showE(errorName | config)`
+### `showE(errorName | config, argsM?)`
 
 Triggers an error.
 
 -   `errorName: string`: The name of the pre-configured error to show. `showE` will look for a local definition first, then a global one.
 -   `config: object`: An inline config object for a one-off error message.
+-   `argsM?: Record<string, any>`: Runtime values used to build dynamic messages and evaluate dynamic options.
+
+## Dynamic `argsM` Example
+
+```javascript
+import { Emessage, showE } from "emessages";
+
+const dataStore = {};
+
+Emessage({
+  TEST3: (argsM) =>`Hello ${argsM.name}, your total marks are ${argsM.totalMarks}`,
+  type: (argsM) => (argsM.name ? "log" : "err"),
+  break: (argsM) => !(argsM.name && argsM.age && argsM.marks?.length > 0),
+  toast: (argsM) => !!(argsM.subject && argsM.marks),
+  callBack: (argsM) => {
+    dataStore.totalMarks = argsM.totalMarks;
+    dataStore.marksPercentage = argsM.getMarksPercentage(argsM.marks);
+  },
+});
+
+showE("TEST3", {
+  name: "Arhan",
+  age: 20,
+  subject: { sub1: "Math", sub2: "Science" },
+  marks: [90, 80, 70],
+  totalMarks: 240,
+  getMarksPercentage: (marks) => (marks.reduce((a, b) => a + b, 0) / 300) * 100,
+});
+
+console.log(dataStore);
+```

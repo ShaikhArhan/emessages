@@ -110,11 +110,9 @@ function injectToastStyles() {
       pointer-events: all;
       max-width: 350px;
       word-break: break-word;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
       box-sizing: border-box;
+      position: relative;
+      padding-right: 42px; /* keep content clear from the absolute close button */
     }
 
     .emessage-toast.visible {
@@ -128,20 +126,25 @@ function injectToastStyles() {
     .emessage-toast-log { background-color: #ffffff; color: #1f2937; border: 1px solid #e5e7eb; } /* white, gray-800 text, gray-200 border */
 
     .emessage-toast-message {
-      flex-grow: 1;
+      display: block;
+      width: 100%;
     }
 
     .emessage-toast-close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
       background: none;
       border: none;
       color: inherit;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       cursor: pointer;
       line-height: 1;
       opacity: 0.7;
-      padding: 0;
-      margin-left: 15px;
+      padding: 2px 6px;
+      margin: 0;
+      z-index: 1;
     }
     .emessage-toast-close:hover {
         opacity: 1;
